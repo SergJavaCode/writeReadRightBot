@@ -8,8 +8,6 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import ru.taksebe.telegram.writeRead.api.dictionaries.DictionaryAdditionService;
-import ru.taksebe.telegram.writeRead.api.dictionaries.DictionaryExcelService;
 import ru.taksebe.telegram.writeRead.constants.bot.BotMessageEnum;
 import ru.taksebe.telegram.writeRead.constants.bot.ButtonNameEnum;
 import ru.taksebe.telegram.writeRead.constants.bot.CallbackDataPartsEnum;
@@ -23,15 +21,12 @@ import ru.taksebe.telegram.writeRead.telegram.keyboards.ReplyKeyboardMaker;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @RequiredArgsConstructor
 public class MessageHandler {
-    DictionaryAdditionService dictionaryAdditionService;
-    DictionaryExcelService dictionaryExcelService;
-
     TelegramApiClient telegramApiClient;
     ReplyKeyboardMaker replyKeyboardMaker;
     InlineKeyboardMaker inlineKeyboardMaker;
 
     public BotApiMethod<?> answerMessage(Message message) {
-        String chatId = message.getChatId().toString();
+        String chatId = message.getChatId().toString(); //получаем ID чата, что бы отправлять ответ в тот чат, который сделал запрос, а не в другой
 
         if (message.hasDocument()) {
             return addUserDictionary(chatId, message.getDocument().getFileId());
@@ -41,7 +36,7 @@ public class MessageHandler {
 
         if (inputText == null) {
             throw new IllegalArgumentException();
-        } else if (inputText.equals("/start")) {
+        } else if (inputText.equals("/start")) { //обрабатываем кнопки постоянной клавиатуры
             return getStartMessage(chatId);
         } else if (inputText.equals(ButtonNameEnum.GET_TASKS_BUTTON.getButtonName())) {
             return getTasksMessage(chatId);
@@ -54,38 +49,34 @@ public class MessageHandler {
             sendMessage.enableMarkdown(true);
             return sendMessage;
         } else {
-            return new SendMessage(chatId, BotMessageEnum.NON_COMMAND_MESSAGE.getMessage());
+            return new SendMessage(chatId, BotMessageEnum.NON_COMMAND_MESSAGE.getMessage()); //обработать текстовые сообщения, отличные от названий кнопок
         }
     }
 
     private SendMessage getStartMessage(String chatId) {
-        SendMessage sendMessage = new SendMessage(chatId, BotMessageEnum.HELP_MESSAGE.getMessage());
+        SendMessage sendMessage = new SendMessage(chatId, BotMessageEnum.HELP_MESSAGE.getMessage()); //выводим сообщение при запуске /start (в данном случае из HELP)
         sendMessage.enableMarkdown(true);
-        sendMessage.setReplyMarkup(replyKeyboardMaker.getMainMenuKeyboard());
+        sendMessage.setReplyMarkup(replyKeyboardMaker.getMainMenuKeyboard());//инициируем вывод постоянной клвиатуры
         return sendMessage;
     }
 
     private SendMessage getTasksMessage(String chatId) {
         SendMessage sendMessage = new SendMessage(chatId, BotMessageEnum.CHOOSE_DICTIONARY_MESSAGE.getMessage());
         sendMessage.setReplyMarkup(inlineKeyboardMaker.getInlineMessageButtons(
-                CallbackDataPartsEnum.TASK_.name(),
-                dictionaryExcelService.isUserDictionaryExist(chatId)
+                CallbackDataPartsEnum.TASK_.name(), false//заглушка
+
         ));
         return sendMessage;
     }
 
     private SendMessage getDictionaryMessage(String chatId) {
         SendMessage sendMessage = new SendMessage(chatId, BotMessageEnum.CHOOSE_DICTIONARY_MESSAGE.getMessage());
-        sendMessage.setReplyMarkup(inlineKeyboardMaker.getInlineMessageButtonsWithTemplate(
-                CallbackDataPartsEnum.DICTIONARY_.name(),
-                dictionaryExcelService.isUserDictionaryExist(chatId)
-        ));
+        sendMessage.setReplyMarkup(new ReplyKeyboardMarkup()); //заглушка
         return sendMessage;
     }
 
     private SendMessage addUserDictionary(String chatId, String fileId) {
         try {
-            dictionaryAdditionService.addUserDictionary(chatId, telegramApiClient.getDocumentFile(fileId));
             return new SendMessage(chatId, BotMessageEnum.SUCCESS_UPLOAD_MESSAGE.getMessage());
         } catch (TelegramFileNotFoundException e) {
             return new SendMessage(chatId, BotMessageEnum.EXCEPTION_TELEGRAM_API_MESSAGE.getMessage());

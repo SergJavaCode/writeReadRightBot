@@ -17,7 +17,7 @@ public class ReplyKeyboardMaker {
 
     public ReplyKeyboardMarkup getMainMenuKeyboard() {
         KeyboardRow row1 = new KeyboardRow();
-        row1.add(new KeyboardButton(ButtonNameEnum.GET_TASKS_BUTTON.getButtonName()));
+        row1.add(new KeyboardButton(ButtonNameEnum.GET_DEDICS_PRICE_BUTTON.getButtonName()));
         row1.add(new KeyboardButton(ButtonNameEnum.GET_DICTIONARY_BUTTON.getButtonName()));
 
         KeyboardRow row2 = new KeyboardRow();

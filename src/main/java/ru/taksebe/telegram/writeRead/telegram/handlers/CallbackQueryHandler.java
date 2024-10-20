@@ -3,12 +3,11 @@ package ru.taksebe.telegram.writeRead.telegram.handlers;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
-import ru.taksebe.telegram.writeRead.api.dictionaries.DictionaryExcelService;
-import ru.taksebe.telegram.writeRead.api.dictionaries.DictionaryResourceFileService;
 import ru.taksebe.telegram.writeRead.api.tasks.TaskService;
 import ru.taksebe.telegram.writeRead.constants.bot.BotMessageEnum;
 import ru.taksebe.telegram.writeRead.constants.bot.CallbackDataPartsEnum;
@@ -24,8 +23,6 @@ import java.io.IOException;
 public class CallbackQueryHandler {
     TelegramApiClient telegramApiClient;
     TaskService taskService;
-    DictionaryExcelService dictionaryExcelService;
-    DictionaryResourceFileService dictionaryResourceFileService;
 
     public BotApiMethod<?> processCallbackQuery(CallbackQuery buttonQuery) throws IOException {
         final String chatId = buttonQuery.getMessage().getChatId().toString();
@@ -80,7 +77,7 @@ public class CallbackQueryHandler {
 
     private SendMessage getDictionary(String chatId, String dictionaryId) {
         try {
-            telegramApiClient.uploadFile(chatId, dictionaryExcelService.getDictionaryWorkbook(dictionaryId));
+
         } catch (UserDictionaryNotFoundException e) {
             return new SendMessage(chatId, BotMessageEnum.EXCEPTION_DICTIONARY_NOT_FOUND_MESSAGE.getMessage());
         } catch (Exception e) {
@@ -91,7 +88,6 @@ public class CallbackQueryHandler {
 
     private SendMessage getAllDefaultDictionaries(String chatId) {
         try {
-            telegramApiClient.uploadFile(chatId, dictionaryExcelService.getAllDefaultDictionariesWorkbook());
         } catch (UserDictionaryNotFoundException e) {
             return new SendMessage(chatId, BotMessageEnum.EXCEPTION_DICTIONARY_NOT_FOUND_MESSAGE.getMessage());
         } catch (Exception e) {
@@ -102,7 +98,7 @@ public class CallbackQueryHandler {
 
     private SendMessage getTemplate(String chatId) {
         try {
-            telegramApiClient.uploadFile(chatId, dictionaryResourceFileService.getTemplateWorkbook());
+            telegramApiClient.uploadFile(chatId, new ByteArrayResource("sdsds".getBytes())); //заглушка
         } catch (Exception e) {
             return new SendMessage(chatId, BotMessageEnum.EXCEPTION_TEMPLATE_WTF_MESSAGE.getMessage());
         }
