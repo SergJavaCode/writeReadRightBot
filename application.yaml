@@ -1,0 +1,8 @@
+telegram:
+  api-url: "https://api.telegram.org/"
+  webhook-path: "https://110baf3080ee8b7b58910c77d94cda7b.serveo.net"
+  bot-name: "@wrTestNameBot"
+  bot-token: "7888704107:AAGOCy-1BgeF0BJB4ZU1W7Y_inM0hrHEbSw"
+
+server:
+  port: 5000
